@@ -45,13 +45,27 @@ class Compiler {
 	}
 
 	static function compile( $string ) {
+		$oldJitSetting = ini_get('pcre.jit');
+
+		/*
+		 * TODO: Make the regex more efficient so that we don't need to disable JIT to run it.
+		 *       With JIT enabled, preg_replace_callback(...) will return NULL due to PREG_JIT_STACKLIMIT_ERROR.
+		 *       As this will only be used at a compile-stage it will not reach production code,
+		 *       so is quite low priority to improve.
+		 */
+		ini_set('pcre.jit', 'Off');
+
 		static $rx = '@
 			^([\x20\t]*)/\*!\* (?:[\x20\t]*(!?\w*))?   # Start with some indent, a comment with the special marker, then an optional name
 			((?:[^*]|\*[^/])*?)                        # Any amount of "a character that isnt a star, or a star not followed by a /
 			\*/                                        # The comment end
 		@mx';
 
-		return preg_replace_callback( $rx, array( __CLASS__, 'create_parser' ), $string ) ;
+		$result = preg_replace_callback($rx, __CLASS__ . '::create_parser', $string);
+
+		ini_set('pcre.jit', $oldJitSetting);
+
+		return $result;
 	}
 
 	static function cli( $args ) {

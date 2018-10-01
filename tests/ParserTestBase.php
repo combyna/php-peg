@@ -3,6 +3,7 @@
 require_once dirname(__DIR__).'/autoloader.php';
 
 use hafriedlander\Peg;
+use PHPUnit\Framework\TestCase;
 
 class ParserTestWrapper {
 	
@@ -41,7 +42,7 @@ class ParserTestWrapper {
 	}
 }
 
-class ParserTestBase extends PHPUnit_Framework_TestCase {
+class ParserTestBase extends TestCase {
 	
 	function buildParser($parser) {
 		$class = 'Parser'.sha1($parser);
